@@ -1,0 +1,35 @@
+# Maven
+procesador_img/target/
+procesador_img/pom.xml.tag
+procesador_img/pom.xml.releaseBackup
+procesador_img/pom.xml.versionsBackup
+procesador_img/pom.xml.next
+procesador_img/elease.properties
+procesador_img/dependency-reduced-pom.xml
+procesador_img/buildNumber.properties
+procesador_img/.mvn/timing.properties
+procesador_img/.mvn/wrapper/maven-wrapper.jar
+
+# Java
+procesador_img/*.class
+procesador_img/*.log
+procesador_img/*.ctxt
+procesador_img/*.jar
+procesador_img/*.war
+procesador_img/*.ear
+procesador_img/*.zip
+procesador_img/*.tar.gz
+procesador_img/*.rar
+procesador_img/hs_err_pid*
+
+
+
+# Visual Studio Code
+.vscode/
+
+
+# Sistemas Operacionais
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
