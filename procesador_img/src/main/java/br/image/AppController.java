@@ -85,6 +85,9 @@ public class AppController implements Initializable {
     private Button buttonGray;
 
     @FXML
+    private Button buttonEquaHist;
+
+    @FXML
     private TextField txtFieldGamma;
 
     @FXML
@@ -342,6 +345,19 @@ public class AppController implements Initializable {
             }
         });
 
+        buttonEquaHist.setOnAction(_ -> {
+            try {
+                histogram.calcular(processetor.getImage());
+                imageRender(histogram.histogramEqualization(processetor.getImage()));
+                criarHistograma(histogram);
+
+            } catch (ImageNullException e) {
+                Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao degama nao é valida",
+                        Alert.AlertType.ERROR);
+
+            }
+        });
+
     }
 
     @SuppressWarnings("unchecked")
@@ -361,18 +377,19 @@ public class AppController implements Initializable {
         chart.setLegendVisible(true);
 
         XYChart.Series<Number, Number> serieR = criarSerie(
-                "Vermelho", histograma.getVermelho());
+                "Vermelho", histograma.getRed());
 
         XYChart.Series<Number, Number> serieG = criarSerie(
-                "Verde", histograma.getVerde());
+                "Verde", histograma.getGreen());
 
         XYChart.Series<Number, Number> serieB = criarSerie(
-                "Azul", histograma.getAzul());
+                "Azul", histograma.getBlue());
 
         chart.getData().addAll(serieR, serieG, serieB);
 
         histogramArea = chart;
-        if (vBoxSidebar.getChildren().isEmpty() == true) {
+        if (vBoxSidebar.getChildren().isEmpty() == true
+                | vBoxSidebar.getChildren().get(0).getClass() != AreaChart.class) {
 
             vBoxSidebar.getChildren().addAll(chart);
         } else {
@@ -447,12 +464,12 @@ public class AppController implements Initializable {
         gc.setFill(Color.web("#202124"));
         gc.fillRect(0, 0, largura, altura);
 
-        long[] r = histogram.getVermelho();
-        long[] g = histogram.getVerde();
-        long[] b = histogram.getAzul();
+        double[] r = histogram.getRed();
+        double[] g = histogram.getGreen();
+        double[] b = histogram.getBlue();
 
         // Maior frequência entre todos os canais.
-        long max = 0;
+        double max = 0;
 
         for (int i = 0; i < 256; i++) {
             max = Math.max(max, r[i]);
@@ -533,13 +550,13 @@ public class AppController implements Initializable {
 
     private void drawCurve(
             GraphicsContext gc,
-            long[] histogram,
+            double[] histogram,
             Color cor,
             double x0,
             double y0,
             double largura,
             double altura,
-            long max) {
+            double max) {
 
         gc.beginPath();
         gc.setStroke(cor);

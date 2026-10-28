@@ -154,7 +154,10 @@
                      </children></AnchorPane>
           </content>
         </ScrollPane>
-            <VBox fx:id="vBoxSidebar" prefHeight="200.0" prefWidth="100.0" />
+            <VBox fx:id="vBoxSidebar" prefHeight="200.0" prefWidth="100.0">
+               <children>
+                  <Button fx:id="buttonEquaHist" mnemonicParsing="false" text="Button" />
+               </children></VBox>
       </items>
     </SplitPane>
     <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
