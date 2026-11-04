@@ -5,9 +5,11 @@ import java.util.ResourceBundle;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.AreaChart;
@@ -388,12 +390,16 @@ public class AppController implements Initializable {
         chart.getData().addAll(serieR, serieG, serieB);
 
         histogramArea = chart;
-        if (vBoxSidebar.getChildren().isEmpty() == true
-                | vBoxSidebar.getChildren().get(0).getClass() != AreaChart.class) {
+        if (vBoxSidebar.getChildren().isEmpty() == true) {
 
             vBoxSidebar.getChildren().addAll(chart);
         } else {
-            vBoxSidebar.getChildren().remove(0);
+            ObservableList<Node> elements = vBoxSidebar.getChildren();
+            for (Node element : elements) {
+                if (element.getClass() == AreaChart.class) {
+                    elements.remove(element);
+                }
+            }
             vBoxSidebar.getChildren().addAll(histogramArea);
         }
     }
