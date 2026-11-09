@@ -34,6 +34,9 @@ import br.image.entities.ImageProcessor;
 import br.image.entities.IntensityTransformer;
 import br.image.exceptions.ImageNullException;
 import br.image.gui.Alerts;
+import br.image.utils.BrushTool;
+import br.image.utils.DFT2D;
+import br.image.utils.FFT2D;
 
 import java.io.File;
 
@@ -44,6 +47,8 @@ public class AppController implements Initializable {
     private Image imageOriginal;
 
     private Histogram histogram = new Histogram();
+
+    private BrushTool brush;
 
     @FXML
     private VBox vBoxSidebar;
@@ -56,6 +61,9 @@ public class AppController implements Initializable {
 
     @FXML
     private Canvas canvasHist;
+
+    @FXML
+    private Canvas canvasFourier;
 
     @FXML
     private MenuBar menuBar;
@@ -86,6 +94,12 @@ public class AppController implements Initializable {
 
     @FXML
     private Button buttonEquaHist;
+
+    @FXML
+    private Button buttonFFT;
+
+    @FXML
+    private Button buttonFuorrieTr;
 
     @FXML
     private TextField txtFieldGamma;
@@ -136,7 +150,7 @@ public class AppController implements Initializable {
 
         processetor.setImage(imageOriginal);
 
-        imageRender(processetor.getImage());
+        imageRender(processetor.getImage(), canvasImage);
         histogram.calcular(processetor.getImage());
         // drawHistogram();
         criarHistograma(histogram);
@@ -153,7 +167,7 @@ public class AppController implements Initializable {
         processetor.setIntensityTransformer(new IntensityTransformer());
         processetor.getIntensityTransformer().setImage(processetor.getImage());
         try {
-            imageRender(processetor.getIntensityTransformer().Negative());
+            imageRender(processetor.getIntensityTransformer().Negative(), canvasImage);
         } catch (ImageNullException e) {
             Alerts.showAlert("", "imagem nula", e.getMessage(), Alert.AlertType.ERROR);
         }
@@ -164,7 +178,7 @@ public class AppController implements Initializable {
         float gamma = Float.parseFloat(txtFieldGamma.getText());
         processetor.setIntensityTransformer(new IntensityTransformer());
         processetor.getIntensityTransformer().setImage(processetor.getImage());
-        imageRender(processetor.getIntensityTransformer().gammaCorrection(gamma));
+        imageRender(processetor.getIntensityTransformer().gammaCorrection(gamma), canvasImage);
     }
 
     @FXML
@@ -172,7 +186,7 @@ public class AppController implements Initializable {
         processetor.setEspacialProcessor(new EspacialProcessor());
         processetor.getEspacialProcessor().setImage(processetor.getImage());
         try {
-            imageRender(processetor.getEspacialProcessor().mediaFilter(3, 3));
+            imageRender(processetor.getEspacialProcessor().mediaFilter(3, 3), canvasImage);
         } catch (ImageNullException e) {
             Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao de gama nao é valida",
                     Alert.AlertType.ERROR);
@@ -186,7 +200,7 @@ public class AppController implements Initializable {
         processetor.setEspacialProcessor(new EspacialProcessor());
         processetor.getEspacialProcessor().setImage(processetor.getImage());
         try {
-            imageRender(processetor.getEspacialProcessor().medianFilter(3));
+            imageRender(processetor.getEspacialProcessor().medianFilter(3), canvasImage);
         } catch (ImageNullException e) {
             Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao de gama nao é valida",
                     Alert.AlertType.ERROR);
@@ -207,6 +221,7 @@ public class AppController implements Initializable {
 
         // }
         // });
+        brush = new BrushTool(canvasFourier);
         sliderGamma.valueProperty().addListener(new ChangeListener<Number>() {
 
             @Override
@@ -230,7 +245,7 @@ public class AppController implements Initializable {
             processetor.getIntensityTransformer().setImage(processetor.getImage());
             processetor.getIntensityTransformer().setImageOriginal(imageOriginal);
             try {
-                imageRender(processetor.getIntensityTransformer().gammaCorrection(gamma));
+                imageRender(processetor.getIntensityTransformer().gammaCorrection(gamma), canvasImage);
             } catch (ImageNullException e) {
                 Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao de gama nao é valida",
                         Alert.AlertType.ERROR);
@@ -253,7 +268,7 @@ public class AppController implements Initializable {
             processetor.getIntensityTransformer().setImageOriginal(imageOriginal);
 
             try {
-                imageRender(processetor.getIntensityTransformer().brightnessAdj(brightness));
+                imageRender(processetor.getIntensityTransformer().brightnessAdj(brightness), canvasImage);
             } catch (ImageNullException e) {
                 Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao de gama nao é valida",
                         Alert.AlertType.ERROR);
@@ -268,7 +283,7 @@ public class AppController implements Initializable {
                 processetor.setGeometricTransformer(new GeometricTransformer());
                 processetor.getGeometricTransformer().setImage(processetor.getImage());
                 try {
-                    imageRender(processetor.getGeometricTransformer().scale(sx, sy));
+                    imageRender(processetor.getGeometricTransformer().scale(sx, sy), canvasImage);
                 } catch (ImageNullException e) {
                     Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao de gama nao é valida",
                             Alert.AlertType.ERROR);
@@ -286,7 +301,7 @@ public class AppController implements Initializable {
                 processetor.getGeometricTransformer().setImage(processetor.getImage());
 
                 try {
-                    imageRender(processetor.getGeometricTransformer().rotation(angle));
+                    imageRender(processetor.getGeometricTransformer().rotation(angle), canvasImage);
                 } catch (ImageNullException e) {
                     Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao de gama nao é valida",
                             Alert.AlertType.ERROR);
@@ -312,7 +327,7 @@ public class AppController implements Initializable {
             processetor.setEspacialProcessor(new EspacialProcessor());
             processetor.getEspacialProcessor().setImage(processetor.getImage());
             try {
-                imageRender(processetor.getEspacialProcessor().laplacianFilter());
+                imageRender(processetor.getEspacialProcessor().laplacianFilter(), canvasImage);
             } catch (ImageNullException e) {
                 Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao degama nao é valida",
                         Alert.AlertType.ERROR);
@@ -323,7 +338,7 @@ public class AppController implements Initializable {
             processetor.setEspacialProcessor(new EspacialProcessor());
             processetor.getEspacialProcessor().setImage(processetor.getImage());
             try {
-                imageRender(processetor.getEspacialProcessor().sobelFilter());
+                imageRender(processetor.getEspacialProcessor().sobelFilter(), canvasImage);
 
             } catch (ImageNullException e) {
                 Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao degama nao é valida",
@@ -336,7 +351,7 @@ public class AppController implements Initializable {
             // processetor.getIntensityTransformer().setImageOriginal(imageOriginal);;
             processetor.getIntensityTransformer().setImage(processetor.getImage());
             try {
-                imageRender(processetor.getIntensityTransformer().toGrayScale());
+                imageRender(processetor.getIntensityTransformer().toGrayScale(), canvasImage);
                 histogram.calcular(processetor.getImage());
                 criarHistograma(histogram);
             } catch (ImageNullException e) {
@@ -348,7 +363,7 @@ public class AppController implements Initializable {
         buttonEquaHist.setOnAction(_ -> {
             try {
                 histogram.calcular(processetor.getImage());
-                imageRender(histogram.histogramEqualization(processetor.getImage()));
+                imageRender(histogram.histogramEqualization(processetor.getImage()), canvasImage);
                 criarHistograma(histogram);
 
             } catch (ImageNullException e) {
@@ -356,6 +371,14 @@ public class AppController implements Initializable {
                         Alert.AlertType.ERROR);
 
             }
+        });
+
+        buttonFFT.setOnAction(_ -> {
+            imageRender(FFT2D.transform(processetor.getImage()).spectrumImage, canvasFourier);
+        });
+
+        buttonFuorrieTr.setOnAction(_ -> {
+            imageRender(DFT2D.transform(processetor.getImage()).spectrumImage, canvasFourier);
         });
 
     }
@@ -413,11 +436,11 @@ public class AppController implements Initializable {
         return serie;
     }
 
-    private void imageRender(Image imagem) {
-        GraphicsContext gc = canvasImage.getGraphicsContext2D();
+    private void imageRender(Image imagem, Canvas canvas) {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        double ch = canvasImage.getHeight();
-        double cw = canvasImage.getWidth();
+        double ch = canvas.getHeight();
+        double cw = canvas.getWidth();
 
         gc.clearRect(0, 0, cw, ch);
 
@@ -576,4 +599,5 @@ public class AppController implements Initializable {
 
         gc.stroke();
     }
+
 }

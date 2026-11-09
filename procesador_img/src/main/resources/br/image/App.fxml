@@ -126,6 +126,9 @@
                                     <Button fx:id="buttonMedian" layoutX="96.0" layoutY="23.0" mnemonicParsing="false" onAction="#onButtonMedian" text="mediana" />
                                     <Button fx:id="buttonLaplacian" layoutX="23.0" layoutY="74.0" mnemonicParsing="false" text="laplacian" />
                                     <Button fx:id="buttonSobel" layoutX="185.0" layoutY="23.0" mnemonicParsing="false" text="sobel" />
+                                    <Button fx:id="buttonFFT" layoutX="116.0" layoutY="74.0" mnemonicParsing="false" text="fft" />
+                                    <Button fx:id="buttonFuorrieTr" layoutX="167.0" layoutY="76.0" mnemonicParsing="false" text="fourier T" />
+                                    <Canvas fx:id="canvasFourier" height="200.0" layoutX="53.0" layoutY="140.0" width="232.0" />
                                  </children>
                               </AnchorPane>
                         </content>
@@ -150,13 +153,13 @@
           <content>
             <AnchorPane id="Content" minHeight="-1.0" minWidth="-1.0" prefHeight="545.0" prefWidth="430.0">
                      <children>
-                        <Canvas fx:id="canvasImage" height="597.0" layoutX="3.0" width="394.0" />
+                        <Canvas fx:id="canvasImage" height="597.0" layoutY="-14.0" width="394.0" />
                      </children></AnchorPane>
           </content>
         </ScrollPane>
             <VBox fx:id="vBoxSidebar" prefHeight="200.0" prefWidth="100.0">
                <children>
-                  <Button fx:id="buttonEquaHist" mnemonicParsing="false" text="Button" />
+                  <Button fx:id="buttonEquaHist" mnemonicParsing="false" text="equalize" />
                </children></VBox>
       </items>
     </SplitPane>
