@@ -17,6 +17,88 @@ public class EspacialProcessor extends ImageHandle {
         super();
     }
 
+    public Image applyKernel(double[][] kernel) {
+
+        if (image == null) {
+            throw new ImageNullException();
+        }
+
+        int m = kernel.length;
+        int n = kernel[0].length;
+
+        int a = n / 2;
+        int b = m / 2;
+
+        int width = (int) image.getWidth();
+        int height = (int) image.getHeight();
+
+        WritableImage imageAux = new WritableImage(
+                width + a * 2,
+                height + b * 2);
+
+        WritableImage imageProcessed = new WritableImage(
+                width,
+                height);
+
+        populateImageAux(imageAux, a);
+
+        PixelReader reader = imageAux.getPixelReader();
+        PixelWriter writer = imageProcessed.getPixelWriter();
+
+        double kernelSum = 0.0;
+
+        for (int y = 0; y < m; y++) {
+            for (int x = 0; x < n; x++) {
+                kernelSum += kernel[y][x];
+            }
+        }
+
+        double divisor = kernelSum == 0.0 ? 1.0 : kernelSum;
+
+        for (int y = 0; y < height; y++) {
+
+            for (int x = 0; x < width; x++) {
+
+                double sumR = 0.0;
+                double sumG = 0.0;
+                double sumB = 0.0;
+
+                for (int ky = 0; ky < m; ky++) {
+
+                    for (int kx = 0; kx < n; kx++) {
+
+                        Color pixel = reader.getColor(
+                                x + a + kx - a,
+                                y + b + ky - b);
+
+                        double coefficient = kernel[ky][kx];
+
+                        sumR += pixel.getRed() * coefficient;
+                        sumG += pixel.getGreen() * coefficient;
+                        sumB += pixel.getBlue() * coefficient;
+                    }
+                }
+
+                sumR /= divisor;
+                sumG /= divisor;
+                sumB /= divisor;
+
+                sumR = Math.clamp(sumR, 0.0, 1.0);
+                sumG = Math.clamp(sumG, 0.0, 1.0);
+                sumB = Math.clamp(sumB, 0.0, 1.0);
+
+                writer.setColor(
+                        x,
+                        y,
+                        new Color(sumR, sumG, sumB, 1.0));
+            }
+        }
+
+        ImageHandle.image = imageProcessed;
+
+        return imageProcessed;
+    }
+
     public Image mediaFilter(int m, int n) {
         if (image == null) {
             throw new ImageNullException();

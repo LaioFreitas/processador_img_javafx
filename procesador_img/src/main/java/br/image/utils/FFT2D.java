@@ -275,6 +275,131 @@ public class FFT2D {
         return result;
     }
 
+    public static WritableImage inverseFiltered(
+            Spectrum spectrum,
+            double[][] mask) {
+
+        int width = spectrum.width;
+        int height = spectrum.height;
+
+        // Copia os coeficientes originais.
+        // Não modifica o espectro original.
+        double[][] real = new double[height][width];
+        double[][] imaginary = new double[height][width];
+
+        for (int y = 0; y < height; y++) {
+            System.arraycopy(
+                    spectrum.real[y], 0,
+                    real[y], 0, width);
+
+            System.arraycopy(
+                    spectrum.imaginary[y], 0,
+                    imaginary[y], 0, width);
+        }
+
+        // Aplica a máscara considerando o FFT Shift.
+        for (int y = 0; y < height; y++) {
+
+            for (int x = 0; x < width; x++) {
+
+                // Coordenadas no espectro visualizado
+                int sx = (x + width / 2) % width;
+                int sy = (y + height / 2) % height;
+
+                // Frequência conjugada
+                int cx = (width - x) % width;
+                int cy = (height - y) % height;
+
+                int csx = (cx + width / 2) % width;
+                int csy = (cy + height / 2) % height;
+
+                // Simetria conjugada para imagem real
+                double m1 = mask[sy][sx];
+                double m2 = mask[csy][csx];
+
+                double m = (m1 + m2) / 2.0;
+
+                real[y][x] *= m;
+                imaginary[y][x] *= m;
+            }
+        }
+
+        // ==========================================
+        // IFFT nas linhas
+        // ==========================================
+
+        for (int y = 0; y < height; y++) {
+
+            fft(
+                    real[y],
+                    imaginary[y],
+                    true);
+        }
+
+        // ==========================================
+        // IFFT nas colunas
+        // ==========================================
+
+        double[] columnReal = new double[height];
+        double[] columnImaginary = new double[height];
+
+        for (int x = 0; x < width; x++) {
+
+            for (int y = 0; y < height; y++) {
+
+                columnReal[y] = real[y][x];
+                columnImaginary[y] = imaginary[y][x];
+            }
+
+            fft(
+                    columnReal,
+                    columnImaginary,
+                    true);
+
+            for (int y = 0; y < height; y++) {
+
+                real[y][x] = columnReal[y];
+                imaginary[y][x] = columnImaginary[y];
+            }
+        }
+
+        // ==========================================
+        // Reconstrução da imagem
+        // ==========================================
+
+        int originalWidth = spectrum.width;
+        int originalHeight = spectrum.height;
+
+        WritableImage result = new WritableImage(
+                originalWidth,
+                originalHeight);
+
+        PixelWriter writer = result.getPixelWriter();
+
+        for (int y = 0; y < originalHeight; y++) {
+
+            for (int x = 0; x < originalWidth; x++) {
+
+                int intensity = (int) Math.round(
+                        real[y][x]);
+
+                intensity = Math.max(
+                        0,
+                        Math.min(255, intensity));
+
+                writer.setColor(
+                        x,
+                        y,
+                        Color.rgb(
+                                intensity,
+                                intensity,
+                                intensity));
+            }
+        }
+
+        return result;
+    }
+
     public static Image aplicarDFT(Image imagem) {
 
         if (imagem == null) {
