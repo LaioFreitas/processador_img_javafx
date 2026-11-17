@@ -68,11 +68,12 @@ public class IntensityTransformer extends ImageHandle {
         return imageProcessed;
     }
 
-    public Image gammaCorrection(float gamma) {
+    public Image gammaCorrection(float gamma, boolean permanence) {
         if (image == null) {
             Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao de gama nao é valida",
                     Alert.AlertType.ERROR);
         }
+
         WritableImage imageProcessed = new WritableImage((int) image.getWidth(), (int) image.getHeight());
         PixelReader readerImg = imageOriginal.getPixelReader();
         PixelWriter writerImgProc = imageProcessed.getPixelWriter();
@@ -80,7 +81,7 @@ public class IntensityTransformer extends ImageHandle {
         int heightImg = (int) image.getHeight();
         int[] pixels = new int[widthImg];
 
-        if (lastGamma != gamma) {
+        if (lastGamma != gamma || permanence) {
             lastGamma = gamma;
             for (int i = 0; i < 256; i++) {
                 float result = (float) Math.pow(i / 255.f, gamma) * 255;
@@ -109,7 +110,9 @@ public class IntensityTransformer extends ImageHandle {
                 writerImgProc.setPixels(0, i, widthImg, 1, PixelFormat.getIntArgbInstance(), pixels, 0, widthImg);
             }
         }
-        image = imageProcessed;
+        if (permanence) {
+            image = imageProcessed;
+        }
         return imageProcessed;
     }
 
@@ -135,9 +138,9 @@ public class IntensityTransformer extends ImageHandle {
                 int green = (pixels[j] >> 8) & 0xff;
                 int blue = pixels[j] & 0xff;
 
-                int thresHoldR = (red > thresHold) ? 255 : 0;
-                int thresHoldG = (green > thresHold) ? 255 : 0;
-                int thresHoldB = (blue > thresHold) ? 255 : 0;
+                int thresHoldR = (red >= thresHold) ? 255 : 0;
+                int thresHoldG = (green >= thresHold) ? 255 : 0;
+                int thresHoldB = (blue >= thresHold) ? 255 : 0;
 
                 pixels[j] = (alfa << 24) | (thresHoldR << 16) | (thresHoldG << 8) | thresHoldB;
             }
@@ -147,14 +150,14 @@ public class IntensityTransformer extends ImageHandle {
         return imageProcessed;
     }
 
-    public Image brightnessAdj(int brightness) {
+    public Image brightnessAdj(int brightness, Boolean permane) {
         if (image == null) {
             Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada nao é valida",
                     Alert.AlertType.ERROR);
         }
 
         WritableImage imageProcessed = new WritableImage((int) image.getWidth(), (int) image.getHeight());
-        if (lastBrightness != brightness) {
+        if (lastBrightness != brightness || permane) {
             lastBrightness = brightness;
 
             for (int i = 0; i < 256; i++) {
@@ -189,7 +192,9 @@ public class IntensityTransformer extends ImageHandle {
                 }
                 writerImgProc.setPixels(0, i, widthImg, 1, PixelFormat.getIntArgbInstance(), pixels, 0, widthImg);
             }
-            image = imageProcessed;
+            if (permane) {
+                image = imageProcessed;
+            }
         }
         return imageProcessed;
     }

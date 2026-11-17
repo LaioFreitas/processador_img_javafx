@@ -31,7 +31,6 @@ public class FFT2D {
         }
     }
 
-    // Próxima potência de 2
     private static int nextPowerOfTwo(int n) {
         int result = 1;
 
@@ -42,14 +41,12 @@ public class FFT2D {
         return result;
     }
 
-    // FFT unidimensional - Cooley-Tukey
     private static void fft(
             double[] real,
             double[] imag,
             boolean inverse) {
         int n = real.length;
 
-        // Bit reversal
         int j = 0;
 
         for (int i = 1; i < n; i++) {
@@ -73,7 +70,6 @@ public class FFT2D {
             }
         }
 
-        // Butterfly
         for (int len = 2; len <= n; len <<= 1) {
 
             double angle = 2.0 * Math.PI / len;
@@ -117,7 +113,6 @@ public class FFT2D {
             }
         }
 
-        // Normalização da transformada inversa
         if (inverse) {
             for (int i = 0; i < n; i++) {
                 real[i] /= n;
@@ -126,7 +121,6 @@ public class FFT2D {
         }
     }
 
-    // FFT bidimensional
     public static Spectrum transform(Image image) {
 
         if (image == null) {
@@ -145,8 +139,6 @@ public class FFT2D {
 
         PixelReader reader = image.getPixelReader();
 
-        // 1. Conversão para escala de cinza
-        // 2. Preenchimento com zeros (zero padding)
         for (int y = 0; y < originalHeight; y++) {
             for (int x = 0; x < originalWidth; x++) {
 
@@ -165,14 +157,12 @@ public class FFT2D {
             }
         }
 
-        // 3. FFT nas linhas
         for (int y = 0; y < height; y++) {
 
             fft(real[y], imaginary[y], false);
 
         }
 
-        // 4. FFT nas colunas
         double[] columnReal = new double[height];
         double[] columnImag = new double[height];
 
@@ -191,7 +181,6 @@ public class FFT2D {
             }
         }
 
-        // 5. Criar imagem do espectro
         WritableImage spectrum = createSpectrumImage(real, imaginary, width, height);
 
         return new Spectrum(
@@ -202,7 +191,6 @@ public class FFT2D {
                 spectrum);
     }
 
-    // Visualização do espectro de magnitude
     private static WritableImage createSpectrumImage(
             double[][] real,
             double[][] imaginary,
@@ -215,7 +203,6 @@ public class FFT2D {
 
         double maxMagnitude = 0.0;
 
-        // Encontrar magnitude máxima
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
 
@@ -232,7 +219,6 @@ public class FFT2D {
             return result;
         }
 
-        // Centralização das frequências
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
 
@@ -282,8 +268,6 @@ public class FFT2D {
         int width = spectrum.width;
         int height = spectrum.height;
 
-        // Copia os coeficientes originais.
-        // Não modifica o espectro original.
         double[][] real = new double[height][width];
         double[][] imaginary = new double[height][width];
 
@@ -297,23 +281,19 @@ public class FFT2D {
                     imaginary[y], 0, width);
         }
 
-        // Aplica a máscara considerando o FFT Shift.
         for (int y = 0; y < height; y++) {
 
             for (int x = 0; x < width; x++) {
 
-                // Coordenadas no espectro visualizado
                 int sx = (x + width / 2) % width;
                 int sy = (y + height / 2) % height;
 
-                // Frequência conjugada
                 int cx = (width - x) % width;
                 int cy = (height - y) % height;
 
                 int csx = (cx + width / 2) % width;
                 int csy = (cy + height / 2) % height;
 
-                // Simetria conjugada para imagem real
                 double m1 = mask[sy][sx];
                 double m2 = mask[csy][csx];
 
@@ -324,10 +304,6 @@ public class FFT2D {
             }
         }
 
-        // ==========================================
-        // IFFT nas linhas
-        // ==========================================
-
         for (int y = 0; y < height; y++) {
 
             fft(
@@ -335,10 +311,6 @@ public class FFT2D {
                     imaginary[y],
                     true);
         }
-
-        // ==========================================
-        // IFFT nas colunas
-        // ==========================================
 
         double[] columnReal = new double[height];
         double[] columnImaginary = new double[height];
@@ -362,10 +334,6 @@ public class FFT2D {
                 imaginary[y][x] = columnImaginary[y];
             }
         }
-
-        // ==========================================
-        // Reconstrução da imagem
-        // ==========================================
 
         int originalWidth = spectrum.width;
         int originalHeight = spectrum.height;
@@ -411,11 +379,9 @@ public class FFT2D {
 
         PixelReader reader = imagem.getPixelReader();
 
-        // Matrizes para armazenar os valores complexos
         double[][] real = new double[altura][largura];
         double[][] imaginario = new double[altura][largura];
 
-        // 1. Converter a imagem para escala de cinza
         double[][] pixels = new double[altura][largura];
 
         for (int y = 0; y < altura; y++) {
@@ -429,7 +395,6 @@ public class FFT2D {
             }
         }
 
-        // 2. Aplicar a DFT bidimensional original
         for (int v = 0; v < altura; v++) {
             for (int u = 0; u < largura; u++) {
 
@@ -454,7 +419,6 @@ public class FFT2D {
             }
         }
 
-        // 3. Calcular o espectro de magnitude
         double[][] magnitude = new double[altura][largura];
 
         double maiorMagnitude = 0.0;
@@ -466,7 +430,6 @@ public class FFT2D {
                         real[v][u] * real[v][u] +
                                 imaginario[v][u] * imaginario[v][u]);
 
-                // Escala logarítmica para visualizar frequências
                 magnitude[v][u] = Math.log1p(mag);
 
                 maiorMagnitude = Math.max(
@@ -475,7 +438,6 @@ public class FFT2D {
             }
         }
 
-        // 4. Criar imagem de saída com o espectro centralizado
         WritableImage resultado = new WritableImage(
                 largura, altura);
 
@@ -484,7 +446,6 @@ public class FFT2D {
         for (int y = 0; y < altura; y++) {
             for (int x = 0; x < largura; x++) {
 
-                // Deslocar as baixas frequências para o centro
                 int origemX = (x + (largura + 1) / 2) % largura;
                 int origemY = (y + (altura + 1) / 2) % altura;
 

@@ -41,7 +41,6 @@ public class DFT2D {
         double[][] real = new double[height][width];
         double[][] imaginary = new double[height][width];
 
-        // Converte a imagem para escala de cinza
         double[][] pixels = new double[height][width];
 
         for (int y = 0; y < height; y++) {
@@ -55,7 +54,6 @@ public class DFT2D {
             }
         }
 
-        // DFT bidimensional
         for (int v = 0; v < height; v++) {
             for (int u = 0; u < width; u++) {
 
@@ -102,7 +100,6 @@ public class DFT2D {
 
         double maxMagnitude = 0;
 
-        // Calcula magnitude e centraliza o espectro
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
 
@@ -110,7 +107,6 @@ public class DFT2D {
                         real[y][x] * real[y][x] +
                                 imaginary[y][x] * imaginary[y][x]);
 
-                // Escala logarítmica
                 mag = Math.log1p(mag);
 
                 int shiftedX = (x + width / 2) % width;
@@ -122,7 +118,6 @@ public class DFT2D {
             }
         }
 
-        // Normalização para exibição
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
 

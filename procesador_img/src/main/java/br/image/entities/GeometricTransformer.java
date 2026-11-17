@@ -11,13 +11,13 @@ import br.image.exceptions.ImageNullException;
 
 public class GeometricTransformer extends ImageHandle {
 
-    public Image scale(int sx, int sy) {
+    public Image scale(double sx, double sy) {
         if (image == null) {
             throw new ImageNullException();
         }
 
-        WritableImage imageProcessed = new WritableImage((int) image.getWidth() * sx,
-                (int) image.getHeight() * sy);
+        WritableImage imageProcessed = new WritableImage((int) (image.getWidth() * sx),
+                (int) (image.getHeight() * sy));
 
         PixelReader reader = image.getPixelReader();
         PixelWriter writer = imageProcessed.getPixelWriter();

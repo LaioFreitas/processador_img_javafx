@@ -5,6 +5,7 @@ import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
+import java.nio.IntBuffer;
 
 import java.util.Arrays;
 
@@ -17,13 +18,12 @@ public class Histogram {
     private final double[] blue = new double[256];
 
     public void calcular(Image imagem) {
-        // Zera as contagens anteriores.
         Arrays.fill(red, 0);
         Arrays.fill(green, 0);
         Arrays.fill(blue, 0);
 
         if (imagem == null) {
-            return;
+            throw new ImageNullException();
         }
 
         PixelReader reader = imagem.getPixelReader();
@@ -63,14 +63,12 @@ public class Histogram {
         int totalPixels = largura * altura;
         int[] pixels = new int[totalPixels];
 
-        PixelFormat<java.nio.IntBuffer> formato = PixelFormat.getIntArgbInstance();
+        PixelFormat<IntBuffer> formato = PixelFormat.getIntArgbInstance();
 
-        // 1. Lê a imagem inteira.
         reader.getPixels(
                 0, 0, largura, altura,
                 PixelFormat.getIntArgbInstance(), pixels, 0, largura);
 
-        // 2. Calcula o histograma em tons de cinza.
         long[] histograma = new long[256];
 
         for (int argb : pixels) {
@@ -84,7 +82,6 @@ public class Histogram {
             histograma[cinza]++;
         }
 
-        // 3. Calcula a CDF e encontra o primeiro valor não nulo.
         long[] cdf = new long[256];
         long acumulado = 0;
         long cdfMin = 0;
@@ -100,7 +97,6 @@ public class Histogram {
             }
         }
 
-        // 4. Cria a tabela de transformação.
         int[] transformacao = new int[256];
         long denominador = totalPixels - cdfMin;
 
@@ -116,7 +112,6 @@ public class Histogram {
                     255.0 * Math.max(0.0, Math.min(1.0, valor)));
         }
 
-        // 5. Aplica a transformação, preservando o alfa.
         for (int i = 0; i < pixels.length; i++) {
             int argb = pixels[i];
 
@@ -136,15 +131,14 @@ public class Histogram {
                     | novoCinza;
         }
 
-        // 6. Escreve a imagem processada.
-        WritableImage resultado = new WritableImage(largura, altura);
-        PixelWriter writer = resultado.getPixelWriter();
+        WritableImage imageProcessed = new WritableImage(largura, altura);
+        PixelWriter writer = imageProcessed.getPixelWriter();
 
         writer.setPixels(
                 0, 0, largura, altura,
                 formato, pixels, 0, largura);
-
-        return resultado;
+        ImageHandle.image = imageProcessed;
+        return imageProcessed;
     }
 
     private WritableImage imagemParaTonsDeCinza(Image imagem) {

@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 
 import br.image.entities.EspacialProcessor;
 import br.image.gui.Alerts;
+import br.image.utils.Utils;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,6 +25,19 @@ public class FormCreatKernelController implements Initializable {
 
     double kernelTam;
     double[][] kernel;
+    AppController controllerApp;
+
+    public void setKernelTam(double kernelTam) {
+        this.kernelTam = kernelTam;
+    }
+
+    public void setKernel(double[][] kernel) {
+        this.kernel = kernel;
+    }
+
+    public void setControllerApp(AppController controllerApp) {
+        this.controllerApp = controllerApp;
+    }
 
     @FXML
     private TextField textTam;
@@ -49,7 +63,7 @@ public class FormCreatKernelController implements Initializable {
             }
         });
 
-        buttonOK.setOnAction(_ -> {
+        buttonOK.setOnAction(event -> {
             ObservableList<Node> filds = gridPane.getChildren();
             kernel = new double[(int) kernelTam][(int) kernelTam];
             Queue<Double> list = new ArrayDeque<>();
@@ -62,29 +76,13 @@ public class FormCreatKernelController implements Initializable {
                 }
             }
 
-            try {
+            controllerApp.getProcessetor().setEspacialProcessor(new EspacialProcessor());
+            controllerApp.getProcessetor().getEspacialProcessor().applyKernel(kernel);
+            Utils.currentStage(event).close();
+        });
 
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("App.fxml"));
-                Pane pane = loader.load();
-
-                AppController controller = loader.getController();
-
-                controller.getProcessetor().setEspacialProcessor(new EspacialProcessor());
-                controller.getProcessetor().getEspacialProcessor().setImage(controller.getProcessetor().getImage());
-                try {
-                    controller.imageRender(controller.getProcessetor().getEspacialProcessor().applyKernel(kernel),
-                            controller.getCanvasImage(), false);
-
-                } catch (Exception e) {
-                    Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao degama nao é valida",
-                            AlertType.ERROR);
-                }
-
-            } catch (Exception e) {
-                Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
-
-            }
-
+        buttonCancel.setOnAction(event -> {
+            Utils.currentStage(event).close();
         });
 
     }

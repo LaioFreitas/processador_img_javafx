@@ -5,12 +5,14 @@ import java.util.ResourceBundle;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -37,6 +39,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -44,6 +47,7 @@ import javafx.stage.Stage;
 import br.image.entities.EspacialProcessor;
 import br.image.entities.GeometricTransformer;
 import br.image.entities.Histogram;
+import br.image.entities.ImageHandle;
 import br.image.entities.ImageProcessor;
 import br.image.entities.IntensityTransformer;
 import br.image.exceptions.ImageNullException;
@@ -57,7 +61,6 @@ import br.image.utils.Utils;
 import br.image.utils.FFT2D.Spectrum;
 
 import java.io.File;
-import java.io.IOException;
 
 public class AppController implements Initializable {
 
@@ -143,6 +146,9 @@ public class AppController implements Initializable {
     private TextField txtFieldRotation;
 
     @FXML
+    private TextField txtThrehold;
+
+    @FXML
     private Slider sliderBrightness;
 
     @FXML
@@ -205,13 +211,14 @@ public class AppController implements Initializable {
         }
     }
 
-    @FXML
-    public void onButtonApplyGamma() {
-        float gamma = Float.parseFloat(txtFieldGamma.getText());
-        processetor.setIntensityTransformer(new IntensityTransformer());
-        processetor.getIntensityTransformer().setImage(processetor.getImage());
-        imageRender(processetor.getIntensityTransformer().gammaCorrection(gamma), canvasImage, false);
-    }
+    // @FXML
+    // public void onButtonApplyGamma() {
+    // float gamma = Float.parseFloat(txtFieldGamma.getText());
+    // processetor.setIntensityTransformer(new IntensityTransformer());
+    // processetor.getIntensityTransformer().setImage(processetor.getImage());
+    // imageRender(processetor.getIntensityTransformer().gammaCorrection(gamma),
+    // canvasImage, false);
+    // }
 
     @FXML
     public void onButtonMedia() {
@@ -276,16 +283,28 @@ public class AppController implements Initializable {
                 sliderGamma.setValue(Double.parseDouble(newValue));
             }
         });
+        txtFieldGamma.setOnKeyPressed(event -> {
+            float gamma = Float.parseFloat(txtFieldGamma.getText());
+            gamma = gamma / 100.f;
+            if (event.getCode() == KeyCode.ENTER) {
+                try {
+                    imageRender(processetor.getIntensityTransformer().gammaCorrection(gamma, true), canvasImage, false);
 
+                } catch (ImageNullException e) {
+                    Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao de gama nao é valida",
+                            Alert.AlertType.ERROR);
+                }
+            }
+        });
         sliderGamma.setOnMouseReleased(_ -> {
             System.out.println("no reace dreg");
             float gamma = Float.parseFloat(txtFieldGamma.getText());
             gamma = gamma / 100.f;
             processetor.setIntensityTransformer(new IntensityTransformer());
             processetor.getIntensityTransformer().setImage(processetor.getImage());
-            processetor.getIntensityTransformer().setImageOriginal(imageOriginal);
+            processetor.getIntensityTransformer().setImageOriginal(processetor.getImage());
             try {
-                imageRender(processetor.getIntensityTransformer().gammaCorrection(gamma), canvasImage, false);
+                imageRender(processetor.getIntensityTransformer().gammaCorrection(gamma, false), canvasImage, false);
             } catch (ImageNullException e) {
                 Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao de gama nao é valida",
                         Alert.AlertType.ERROR);
@@ -300,6 +319,23 @@ public class AppController implements Initializable {
             sliderBrightness.setValue(Double.parseDouble(newText));
         });
 
+        txtFieldBrightness.setOnKeyPressed(event -> {
+            int brightness = Integer.parseInt(txtFieldBrightness.getText());
+            brightness *= (int) (255 / 100);
+            if (event.getCode() == KeyCode.ENTER) {
+                try {
+                    imageRender(processetor.getIntensityTransformer().gammaCorrection(brightness, true), canvasImage,
+                            false);
+                    histogram.calcular(processetor.getImage());
+                    criarHistograma(histogram);
+                } catch (ImageNullException e) {
+                    Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao de gama nao é valida",
+                            Alert.AlertType.ERROR);
+                }
+            }
+
+        });
+
         sliderBrightness.setOnMouseReleased(_ -> {
             int brightness = Integer.parseInt(txtFieldBrightness.getText());
             brightness *= (int) (255 / 100);
@@ -308,7 +344,7 @@ public class AppController implements Initializable {
             processetor.getIntensityTransformer().setImageOriginal(imageOriginal);
 
             try {
-                imageRender(processetor.getIntensityTransformer().brightnessAdj(brightness), canvasImage, false);
+                imageRender(processetor.getIntensityTransformer().brightnessAdj(brightness, false), canvasImage, false);
             } catch (ImageNullException e) {
                 Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao de gama nao é valida",
                         Alert.AlertType.ERROR);
@@ -318,12 +354,14 @@ public class AppController implements Initializable {
         txtFieldScale.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
 
-                int sx = Integer.parseInt(txtFieldScale.getText());
-                int sy = sx;
+                double sx = Double.parseDouble(txtFieldScale.getText());
+                double sy = sx;
                 processetor.setGeometricTransformer(new GeometricTransformer());
                 processetor.getGeometricTransformer().setImage(processetor.getImage());
                 try {
                     imageRender(processetor.getGeometricTransformer().scale(sx, sy), canvasImage, false);
+                    histogram.calcular(processetor.getImage());
+                    criarHistograma(histogram);
                 } catch (ImageNullException e) {
                     Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada para correcao de gama nao é valida",
                             Alert.AlertType.ERROR);
@@ -402,8 +440,8 @@ public class AppController implements Initializable {
 
         buttonEquaHist.setOnAction(_ -> {
             try {
-                histogram.calcular(processetor.getImage());
                 imageRender(histogram.histogramEqualization(processetor.getImage()), canvasImage, false);
+                histogram.calcular(processetor.getImage());
                 criarHistograma(histogram);
 
             } catch (ImageNullException e) {
@@ -430,6 +468,21 @@ public class AppController implements Initializable {
             createDialogFormKernelCreate(Utils.currentStage(event));
         });
 
+        txtThrehold.setOnKeyPressed(event -> {
+
+            if (event.getCode() == KeyCode.ENTER) {
+                double value = Double.parseDouble(txtThrehold.getText());
+                processetor.setIntensityTransformer(new IntensityTransformer());
+                processetor.getIntensityTransformer().thresHolding((int) value);
+                // processetor.getIntensityTransformer().toGrayScale();
+                imageRender(processetor.getIntensityTransformer().thresHolding((int) value),
+                        canvasImage, false);
+                histogram.calcular(processetor.getImage());
+                criarHistograma(histogram);
+
+            }
+        });
+
         Tab tab = tabPane.getTabs().get(0);
         ScrollPane scrol = (ScrollPane) tab.getContent();
         VBox hsiArea = createHSIPanel();
@@ -447,12 +500,15 @@ public class AppController implements Initializable {
             Pane pane = loader.load();
 
             Stage formsStage = new Stage();
+            FormCreatKernelController controller = loader.getController();
+            controller.setControllerApp(this);
             formsStage.setTitle("Crie kernel");
             formsStage.setScene(new Scene(pane));
             formsStage.setResizable(false);
             formsStage.initOwner(parentStage);
             formsStage.initModality(Modality.WINDOW_MODAL);
             formsStage.showAndWait();
+            imageRender(processetor.getImage(), canvasImage, false);
 
         } catch (Exception e) {
             Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), Alert.AlertType.ERROR);
@@ -588,28 +644,45 @@ public class AppController implements Initializable {
         chart.setTitle("Histograma RGB");
         chart.setCreateSymbols(false);
         chart.setAnimated(false);
-        chart.setLegendVisible(true);
+        chart.setLegendVisible(false);
 
         XYChart.Series<Number, Number> serieR = criarSerie(
-                "Vermelho", histograma.getRed());
+                "", histograma.getRed());
 
         XYChart.Series<Number, Number> serieG = criarSerie(
-                "Verde", histograma.getGreen());
+                "", histograma.getGreen());
 
         XYChart.Series<Number, Number> serieB = criarSerie(
-                "Azul", histograma.getBlue());
+                "", histograma.getBlue());
 
         chart.getData().addAll(serieR, serieG, serieB);
 
-        histogramArea = chart;
-        if (vBoxSidebar.getChildren().isEmpty() == true
-                | vBoxSidebar.getChildren().get(0).getClass() != AreaChart.class) {
+        // histogramArea = chart;
+        // if (vBoxSidebar.getChildren().isEmpty() == true
+        // || vBoxSidebar.getChildren().get(0).getClass() != AreaChart.class) {
+        //
+        // vBoxSidebar.getChildren().addAll(chart);
+        // } else {
+        // vBoxSidebar.getChildren().remove(1);
+        // vBoxSidebar.getChildren().addAll(histogramArea);
+        // }
+        ObservableList<Node> list = vBoxSidebar.getChildren();
 
-            vBoxSidebar.getChildren().addAll(chart);
+        int index = list.indexOf(histogramArea);
+
+        histogramArea = chart;
+        if (index != -1) {
+            list.set(index, chart);
         } else {
-            vBoxSidebar.getChildren().remove(0);
-            vBoxSidebar.getChildren().addAll(histogramArea);
+            list.add(chart);
         }
+
+        // for (Node element : list) {
+        // if (element instanceof AreaChart) {
+        // list.remove(element);
+        // list.add(chart);
+        // }
+        // }
     }
 
     private XYChart.Series<Number, Number> criarSerie(
@@ -657,6 +730,7 @@ public class AppController implements Initializable {
         }
         gc.drawImage(imagem, x, y, largura, altura);
         setDimLabel((int) imagem.getWidth(), (int) imagem.getHeight());
+
     }
 
     private void setDimLabel(int width, int height) {

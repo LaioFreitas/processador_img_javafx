@@ -101,21 +101,23 @@
                                 <AnchorPane minHeight="0.0" minWidth="120.0" prefHeight="782.0" prefWidth="389.0">
                                        <children>
                                           <Button fx:id="buttonNegative" layoutX="51.0" layoutY="27.0" mnemonicParsing="false" onAction="#onButtonNegativeAction" text="Negative" />
-                                          <TextField fx:id="txtFieldGamma" alignment="CENTER" layoutX="234.0" layoutY="121.0" prefHeight="26.0" prefWidth="38.0" promptText="0.33">
+                                          <TextField fx:id="txtFieldGamma" alignment="CENTER" layoutX="234.0" layoutY="157.0" prefHeight="26.0" prefWidth="38.0" promptText="0.33">
                                              <font>
                                                 <Font size="11.0" />
                                              </font>
                                           </TextField>
-                                          <Label layoutX="94.0" layoutY="90.0" text="Gamma" />
-                                          <Slider fx:id="sliderGamma" layoutX="94.0" layoutY="122.0" showTickLabels="true" showTickMarks="true" />
-                                          <Slider fx:id="sliderBrightness" layoutX="94.0" layoutY="195.0" showTickLabels="true" showTickMarks="true" />
-                                          <TextField fx:id="txtFieldBrightness" layoutX="234.0" layoutY="194.0" prefHeight="26.0" prefWidth="38.0" promptText="0.33">
+                                          <Label layoutX="95.0" layoutY="139.0" text="Gamma" />
+                                          <Slider fx:id="sliderGamma" layoutX="85.0" layoutY="157.0" showTickLabels="true" showTickMarks="true" />
+                                          <Slider fx:id="sliderBrightness" layoutX="88.0" layoutY="235.0" showTickLabels="true" showTickMarks="true" />
+                                          <TextField fx:id="txtFieldBrightness" layoutX="234.0" layoutY="235.0" prefHeight="26.0" prefWidth="38.0" promptText="0.33">
                                              <font>
                                                 <Font size="11.0" />
                                              </font>
                                           </TextField>
-                                          <Label layoutX="94.0" layoutY="172.0" text="Brightness" />
+                                          <Label layoutX="94.0" layoutY="213.0" text="Brightness" />
                                           <Button fx:id="buttonGray" layoutX="141.0" layoutY="27.0" mnemonicParsing="false" text="Gray" />
+                                          <TextField fx:id="txtThrehold" layoutX="87.0" layoutY="113.0" />
+                                          <Label layoutX="78.0" layoutY="88.0" text="threshold:" />
                                        </children>
                                     </AnchorPane>
                                  </content>
