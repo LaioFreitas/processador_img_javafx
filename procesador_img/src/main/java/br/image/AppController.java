@@ -720,7 +720,6 @@ public class AppController implements Initializable {
 
         if (frequencyRender) {
 
-            // Dimensões finais da imagem renderizada
             renderWidth = largura;
             renderHeight = altura;
 

@@ -9,7 +9,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Atualizado para o seu Java 27 instalado -->
         <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>26</maven.compiler.target>
+        <maven.compiler.target>25</maven.compiler.target>
     </properties>
     
     <dependencies>
