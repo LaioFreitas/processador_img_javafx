@@ -134,6 +134,9 @@ public class AppController implements Initializable {
     private Button buttonCreateKernel;
 
     @FXML
+    private Button buttonColor;
+
+    @FXML
     private TextField txtFieldGamma;
 
     @FXML
@@ -473,7 +476,6 @@ public class AppController implements Initializable {
             if (event.getCode() == KeyCode.ENTER) {
                 double value = Double.parseDouble(txtThrehold.getText());
                 processetor.setIntensityTransformer(new IntensityTransformer());
-                processetor.getIntensityTransformer().thresHolding((int) value);
                 // processetor.getIntensityTransformer().toGrayScale();
                 imageRender(processetor.getIntensityTransformer().thresHolding((int) value),
                         canvasImage, false);
@@ -483,6 +485,10 @@ public class AppController implements Initializable {
             }
         });
 
+        buttonColor.setOnAction(_ -> {
+            processetor.setIntensityTransformer(new IntensityTransformer());
+            imageRender(processetor.getIntensityTransformer().toColor(), canvasImage, false);
+        });
         Tab tab = tabPane.getTabs().get(0);
         ScrollPane scrol = (ScrollPane) tab.getContent();
         VBox hsiArea = createHSIPanel();

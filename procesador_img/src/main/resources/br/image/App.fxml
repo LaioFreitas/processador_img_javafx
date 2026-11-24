@@ -53,7 +53,7 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.image.AppController">
+<VBox prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/27.0.1.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.image.AppController">
   <children>
     <MenuBar prefWidth="909.0" VBox.vgrow="NEVER">
       <menus>
@@ -118,6 +118,7 @@
                                           <Button fx:id="buttonGray" layoutX="141.0" layoutY="27.0" mnemonicParsing="false" text="Gray" />
                                           <TextField fx:id="txtThrehold" layoutX="87.0" layoutY="113.0" />
                                           <Label layoutX="78.0" layoutY="88.0" text="threshold:" />
+                                          <Button fx:id="buttonColor" layoutX="209.0" layoutY="29.0" mnemonicParsing="false" text="color" />
                                        </children>
                                     </AnchorPane>
                                  </content>

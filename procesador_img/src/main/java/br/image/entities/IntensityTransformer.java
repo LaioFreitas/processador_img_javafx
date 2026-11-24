@@ -232,6 +232,46 @@ public class IntensityTransformer extends ImageHandle {
         return imageProcessed;
     }
 
+    public Image toColor() {
+        if (image == null) {
+            Alerts.showAlert("Error", "Imagem nula", "Imagem selecionada nao é valida",
+                    Alert.AlertType.ERROR);
+        }
+
+        WritableImage imageProcessed = new WritableImage((int) image.getWidth(), (int) image.getHeight());
+        PixelWriter writerImgProc = imageProcessed.getPixelWriter();
+        PixelReader readerImg = image.getPixelReader();
+        int widthImg = (int) image.getWidth();
+        int heightImg = (int) image.getHeight();
+        int[] pixels = new int[widthImg];
+
+        for (int i = 0; i < heightImg; i++) {
+            readerImg.getPixels(0, i, widthImg, 1, PixelFormat.getIntArgbInstance(), pixels, 0, widthImg);
+            for (int j = 0; j < widthImg; j++) {
+                int pixel = pixels[j];
+
+                int alfa = (pixel >> 24) & 0xff;
+                int red = (pixel >> 16) & 0xff;
+                int green = (pixel >> 8) & 0xff;
+                int blue = pixel & 0xff;
+
+                float redF = red / 255.f;
+                float greenF = green / 255.f;
+                float blueF = blue / 255.f;
+
+                red = (int) Math.round(redF / 0.299) * 255;
+                green = (int) Math.round(greenF / 0.587) * 255;
+                blue = (int) Math.round(blueF / 0.114) * 255;
+
+                pixels[j] = (alfa << 24) | (red << 16) | (green << 8) | blue;
+            }
+            writerImgProc.setPixels(0, i, widthImg, 1, PixelFormat.getIntArgbInstance(), pixels, 0, widthImg);
+        }
+        image = imageProcessed;
+        return imageProcessed;
+
+    }
+
     public Image getImageOriginal() {
         return imageOriginal;
     }
